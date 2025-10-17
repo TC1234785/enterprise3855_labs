@@ -1,0 +1,125 @@
+openapi: 3.0.3
+info:
+  description: This API receives active North America train and train station data
+  version: "1.0.0"
+  title: NA train Information
+  contact:
+    email: tchau29@my.bcit.ca
+paths:
+  /na_train/passenger_count:
+    post:
+      summary: Reports a single passenger_count sensor reading
+      operationId: app.report_count_reading
+      description: Adds a single passenger_count reading
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PassengerReading'
+      responses:
+        '201':
+          description: reading successfully received
+        '400':
+          description: 'invalid input, object invalid'
+  /na_train/incoming_train:
+    post:
+      summary: Reports a single incoming_train reading
+      operationId: app.report_wait_time_reading
+      description: Adds a single incoming_train reading
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncomingTrainReading'
+      responses:
+        '201':
+          description: reading successfully received
+        '400':
+          description: 'invalid input, object invalid'
+
+components:
+  schemas:
+    PassengerReading:
+      required:
+        - trace_id
+        - station_id
+        - station_name
+        - transit_system
+        - passenger_count
+        - batch_timestamp
+        - recorded_timestamp
+      properties:
+        trace_id:
+          type: integer
+          format: int64
+          example: 1632934353001234567
+        station_id:
+          type: string
+          format: uuid
+          example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        station_name:
+          type: string
+          example: "Yellowknife North"
+        transit_system:
+          type: string
+          example: "Metro Vancouver"
+        passenger_count:
+          type: number
+          example: 42
+        batch_timestamp:
+          type: string
+          format: date-time
+          example: "2016-08-29T09:12:33.001Z"
+        recorded_timestamp:
+          type: string
+          format: date-time
+          example: "2016-08-29T09:12:33.001Z"
+      type: object
+
+    IncomingTrainReading:
+      required:
+        - trace_id
+        - station_id
+        - station_name
+        - transit_system
+        - current_minutes_wait
+        - active_alerts
+        - batch_timestamp
+        - recorded_timestamp
+      properties:
+        trace_id:
+          type: integer
+          format: int64
+          example: 1632934353001234567
+        station_id:
+          type: string
+          format: uuid
+          example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        station_name:
+          type: string
+          example: "Yellowknife North"
+        transit_system:
+          type: string
+          example: "Metro Vancouver"
+        current_minutes_wait:
+          type: number
+          example: 5
+        active_alerts:
+          type: string
+          description: Alerts for the train arriving at the station
+          enum:
+            - none
+            - maintenance_needed
+            - full
+            - alarm_active
+            - other
+          example: "none"
+        batch_timestamp:
+          type: string
+          format: date-time
+          example: "2016-08-29T09:12:33.001Z"
+        recorded_timestamp:
+          type: string
+          format: date-time
+          example: "2016-08-29T09:12:33.001Z"
+      type: object

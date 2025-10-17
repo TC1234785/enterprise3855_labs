@@ -1,0 +1,51 @@
+2025-10-16 01:12:21,875 - basicLogger - INFO - Starting Receiver Service on port 8080
+2025-10-16 01:19:40,664 - basicLogger - INFO - Received event passenger_count with 2 readings
+2025-10-16 01:19:40,665 - basicLogger - INFO - Received event passenger_count with a trace id of 1760602780665577200
+2025-10-16 01:20:12,790 - basicLogger - INFO - Received event passenger_count with 2 readings
+2025-10-16 01:20:12,791 - basicLogger - INFO - Received event passenger_count with a trace id of 1760602812791729100
+2025-10-16 01:20:13,896 - basicLogger - INFO - Response for event passenger_count (id: 1760602812791729100) has status 201
+2025-10-16 01:20:13,897 - basicLogger - INFO - Received event passenger_count with a trace id of 1760602813897207700
+2025-10-16 01:20:14,967 - basicLogger - INFO - Response for event passenger_count (id: 1760602813897207700) has status 201
+2025-10-16 01:20:34,622 - basicLogger - INFO - Received event wait_time with 2 readings
+2025-10-16 01:20:34,622 - basicLogger - INFO - Received event wait_time with a trace id of 1760602834622892600
+2025-10-16 01:20:35,689 - basicLogger - INFO - Response for event wait_time (id: 1760602834622892600) has status 201
+2025-10-16 01:20:35,690 - basicLogger - INFO - Received event wait_time with a trace id of 1760602835690878900
+2025-10-16 01:20:36,757 - basicLogger - INFO - Response for event wait_time (id: 1760602835690878900) has status 201
+2025-10-16 01:24:17,525 - basicLogger - INFO - Starting Receiver Service on port 8080
+2025-10-16 01:25:22,478 - basicLogger - INFO - Received event passenger_count with 2 readings
+2025-10-16 01:25:22,478 - basicLogger - INFO - Received event passenger_count with a trace id of 1760603122478553800
+2025-10-16 01:25:23,730 - basicLogger - INFO - Response for event passenger_count (id: 1760603122478553800) has status 201
+2025-10-16 01:25:23,731 - basicLogger - INFO - Received event passenger_count with a trace id of 1760603123731306700
+2025-10-16 01:25:24,815 - basicLogger - INFO - Response for event passenger_count (id: 1760603123731306700) has status 201
+2025-10-16 01:30:19,615 - basicLogger - INFO - Received event wait_time with 2 readings
+2025-10-16 01:30:19,616 - basicLogger - INFO - Received event wait_time with a trace id of 1760603419616440300
+2025-10-16 01:30:22,762 - basicLogger - INFO - Response for event wait_time (id: 1760603419616440300) has status 201
+2025-10-16 01:30:22,762 - basicLogger - INFO - Received event wait_time with a trace id of 1760603422762314900
+2025-10-16 01:30:23,907 - basicLogger - INFO - Response for event wait_time (id: 1760603422762314900) has status 201
+2025-10-16 01:36:51,200 - basicLogger - INFO - Starting Receiver Service on port 8080
+2025-10-16 01:37:01,709 - basicLogger - INFO - Received event passenger_count with 2 readings
+2025-10-16 01:37:01,710 - basicLogger - INFO - Received event passenger_count with a trace id of 1760603821710624200
+2025-10-16 01:37:02,922 - basicLogger - INFO - Response for event passenger_count (id: 1760603821710624200) has status 201
+2025-10-16 01:37:02,923 - basicLogger - INFO - Received event passenger_count with a trace id of 1760603822923677600
+2025-10-16 01:37:04,004 - basicLogger - INFO - Response for event passenger_count (id: 1760603822923677600) has status 201
+2025-10-16 01:37:37,142 - basicLogger - INFO - Received event wait_time with 2 readings
+2025-10-16 01:37:37,142 - basicLogger - INFO - Received event wait_time with a trace id of 1760603857142277000
+2025-10-16 01:37:38,224 - basicLogger - INFO - Response for event wait_time (id: 1760603857142277000) has status 201
+2025-10-16 01:37:38,225 - basicLogger - INFO - Received event wait_time with a trace id of 1760603858225980500
+2025-10-16 01:37:39,284 - basicLogger - INFO - Response for event wait_time (id: 1760603858225980500) has status 201
+2025-10-16 01:53:05,352 - basicLogger - INFO - Received event passenger_count with 2 readings
+2025-10-16 01:53:05,352 - basicLogger - INFO - Received event passenger_count with a trace id of 1760604785352727100
+2025-10-16 01:53:06,459 - basicLogger - INFO - Response for event passenger_count (id: 1760604785352727100) has status 201
+2025-10-16 01:53:06,460 - basicLogger - INFO - Received event passenger_count with a trace id of 1760604786460080600
+2025-10-16 01:53:07,529 - basicLogger - INFO - Response for event passenger_count (id: 1760604786460080600) has status 201
+2025-10-16 01:53:25,880 - basicLogger - INFO - Received event wait_time with 2 readings
+2025-10-16 01:53:25,881 - basicLogger - INFO - Received event wait_time with a trace id of 1760604805881748600
+2025-10-16 01:53:26,963 - basicLogger - INFO - Response for event wait_time (id: 1760604805881748600) has status 201
+2025-10-16 01:53:26,963 - basicLogger - INFO - Received event wait_time with a trace id of 1760604806963724100
+2025-10-16 01:53:28,038 - basicLogger - INFO - Response for event wait_time (id: 1760604806963724100) has status 201
+2025-10-16 01:55:46,161 - basicLogger - INFO - Starting Receiver Service on port 8080
+2025-10-16 01:55:52,534 - basicLogger - INFO - Received event passenger_count with 2 readings
+2025-10-16 01:55:52,535 - basicLogger - INFO - Received event passenger_count with a trace id of 1760604952535121300
+2025-10-16 01:55:53,755 - basicLogger - INFO - Response for event passenger_count (id: 1760604952535121300) has status 201
+2025-10-16 01:55:53,756 - basicLogger - INFO - Received event passenger_count with a trace id of 1760604953756770700
+2025-10-16 01:55:54,830 - basicLogger - INFO - Response for event passenger_count (id: 1760604953756770700) has status 201

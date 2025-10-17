@@ -1,0 +1,121 @@
+openapi: 3.0.3
+info:
+  description: This API receives active North America train and train station data
+  version: "1.0.0"
+  title: NA train Information
+  contact:
+    email: tchau29@my.bcit.ca
+paths:
+  /na_train/passenger_count:
+    post:
+      summary: Reports a batch of passenger_count sensor readings
+      operationId: app.report_count_readings
+      description: Adds a batch of passenger_count readings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PassengerReadingBatch'
+      responses:
+        '201':
+          description: batch successfully received
+        '400':
+          description: 'invalid input, object invalid'
+  /na_train/incoming_train:
+    post:
+      summary: Reports a batch of incoming_train readings
+      operationId: app.report_wait_time_reading
+      description: Adds a batch of incoming_train readings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncomingTrainReadingBatch'
+      responses:
+        '201':
+          description: batch successfully received
+        '400':
+          description: 'invalid input, object invalid'
+
+components:
+  schemas:
+    PassengerReadingBatch:
+      required:
+        - station_id
+        - station_name
+        - transit_system
+        - reporting_timestamp
+        - readings
+      properties:
+        station_id:
+          type: string
+          format: uuid
+        station_name:
+          type: string
+        transit_system:
+          type: string
+        reporting_timestamp:
+          type: string
+          format: date-time
+        readings:
+          type: array
+          items:
+            $ref: "#/components/schemas/PassengerReading"
+      type: object
+
+    PassengerReading:
+      required:
+        - passenger_count
+        - recorded_timestamp
+      properties:
+        passenger_count:
+          type: number
+        recorded_timestamp:
+          type: string
+          format: date-time
+      type: object
+
+    IncomingTrainReadingBatch:
+      required:
+        - station_id
+        - station_name
+        - reporting_timestamp
+        - readings
+      properties:
+        station_id:
+          type: string
+          format: uuid
+        station_name:
+          type: string
+        transit_system:
+          type: string
+        reporting_timestamp:
+          type: string
+          format: date-time
+        readings:
+          type: array
+          items:
+            $ref: '#/components/schemas/IncomingTrainReading'
+      type: object
+
+    IncomingTrainReading:
+      required:
+        - current_minutes_wait
+        - active_alerts
+        - recorded_timestamp
+      properties:
+        current_minutes_wait:
+          type: number
+        active_alerts:
+          type: string
+          description: Alerts for the train arriving at the station
+          enum:
+            - none
+            - maintenance_needed
+            - full
+            - alarm_active
+            - other
+        recorded_timestamp:
+          type: string
+          format: date-time
+      type: object

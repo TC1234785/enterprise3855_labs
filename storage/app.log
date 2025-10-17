@@ -1,0 +1,10 @@
+2025-10-16 01:20:13,886 - basicLogger - DEBUG - Stored event passenger_count with a trace id of 1760602812791729100
+2025-10-16 01:20:14,959 - basicLogger - DEBUG - Stored event passenger_count with a trace id of 1760602813897207700
+2025-10-16 01:20:35,683 - basicLogger - DEBUG - Stored event wait_time with a trace id of 1760602834622892600
+2025-10-16 01:20:36,752 - basicLogger - DEBUG - Stored event wait_time with a trace id of 1760602835690878900
+2025-10-16 01:25:23,682 - basicLogger - DEBUG - Stored event passenger_count with a trace id of 1760603122478553800
+2025-10-16 01:25:24,808 - basicLogger - DEBUG - Stored event passenger_count with a trace id of 1760603123731306700
+2025-10-16 01:30:20,680 - basicLogger - DEBUG - Stored event wait_time with a trace id of 1760603419616440300
+2025-10-16 01:30:23,867 - basicLogger - DEBUG - Stored event wait_time with a trace id of 1760603422762314900
+2025-10-16 01:55:53,753 - basicLogger - DEBUG - Stored event passenger_count with a trace id of 1760604952535121300
+2025-10-16 01:55:54,827 - basicLogger - DEBUG - Stored event passenger_count with a trace id of 1760604953756770700
