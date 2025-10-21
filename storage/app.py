@@ -5,8 +5,11 @@ import os
 import yaml
 import logging
 import logging.config
+from datetime import datetime as dt
+from datetime import date
+
 from event_models import PassengerCountEvent, WaitTimeEvent  
-from sqlalchemy import create_engine  
+from sqlalchemy import create_engine, select  
 from sqlalchemy.orm import sessionmaker 
  
 # Seems like the datetime information does not get parsed correctly without this
@@ -67,6 +70,21 @@ def report_count_reading(session, body):
     return NoContent, 201 
 
 @use_db_session
+def get_passenger_count_readings(session,start_timestamp, end_timestamp):
+    """ Gets new passenger_count readings between the start and end timestamps """
+
+    start = dt.fromisoformat(start_timestamp)
+    end = dt.fromisoformat(end_timestamp)
+
+    statement = select(PassengerCountEvent).where(PassengerCountEvent.date_created >= start).where(PassengerCountEvent.date_created < end)
+    results = [result.to_dict()
+        for result in session.execute(statement).scalars().all()
+        ]
+    session.close()
+    logger.debug("Found %d PassengerCountEvent pressure readings (start: %s, end: %s)", len(results), start, end)
+    return results
+
+@use_db_session
 def report_wait_time_reading(session, body):
     trace_id = body.get("trace_id")
     #Store wait time reading in the database
@@ -88,7 +106,24 @@ def report_wait_time_reading(session, body):
     
     return NoContent, 201  
 
+@use_db_session
+def get_wait_time_reading(session,start_timestamp, end_timestamp):
+    """ Gets new wait_time readings between the start and end timestamps """
+
+    start = dt.fromisoformat(start_timestamp)
+    end = dt.fromisoformat(end_timestamp)
+    print(type(start), 'Start:',start)
+    print(type(end), 'End:', end)
+    statement = select(WaitTimeEvent).where(WaitTimeEvent.date_created >= start).where(WaitTimeEvent.date_created < end)
+    results = [result.to_dict()
+        for result in session.execute(statement).scalars().all()
+        ]
+    session.close()
+    logger.debug("Found %d WaitTimeEvent pressure readings (start: %s, end: %s)", len(results), start, end)
+    return results
+
 app = connexion.FlaskApp(__name__, specification_dir='')  
 app.add_api("student-770-NorthAmericanTrainInfo-1.0.0-swagger.yaml", strict_validation=True, validate_responses=True)  # Add OpenAPI spec
 if __name__ == "__main__":
+    logger.info("Starting Storage Service on port 8090")
     app.run(port=8090)  

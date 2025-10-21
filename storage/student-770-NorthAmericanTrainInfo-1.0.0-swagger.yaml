@@ -21,6 +21,35 @@ paths:
           description: reading successfully received
         '400':
           description: 'invalid input, object invalid'
+    get:
+      summary: Get new passenger_count_readings events
+      operationId: app.get_passenger_count_readings
+      description: Gets passenger_count_readings
+      parameters:
+        - name: start_timestamp
+          in: query
+          description: Start of the timespan
+          schema:
+            type: string
+            format: date-time
+            example: 2016-08-29T09:12:33.001Z
+        - name: end_timestamp
+          in: query
+          description: End of the timespan
+          schema:
+            type: string
+            format: date-time
+            example: 2016-08-29T09:12:33.001Z         
+      responses:
+        '200':
+          description: Successfully returned a list of passenger readings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PassengerReading'
+
   /na_train/incoming_train:
     post:
       summary: Reports a single incoming_train reading
@@ -36,6 +65,35 @@ paths:
           description: reading successfully received
         '400':
           description: 'invalid input, object invalid'
+    get:
+      summary: Get new wait_time events
+      operationId: app.get_wait_time_reading
+      description: Gets wait_time readings
+      parameters:
+        - name: start_timestamp
+          in: query
+          description: Start of the timespan
+          schema:
+            type: string
+            format: date-time
+            example: 2016-08-29T09:12:33.001Z
+        - name: end_timestamp
+          in: query
+          description: End of the timespan
+          schema:
+            type: string
+            format: date-time
+            example: 2016-08-29T09:12:33.001Z         
+      responses:
+        '200':
+          description: Successfully returned a list of wait_time readings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IncomingTrainReading'
+        
 
 components:
   schemas:

@@ -1,0 +1,14 @@
+version: 1
+scheduler:
+  interval: 5
+
+events:
+  passenger_count:
+    url: http://localhost:8090/na_train/passenger_count
+  wait_time:
+    url: http://localhost:8090/na_train/incoming_train
+
+
+
+
+

@@ -1,0 +1,21 @@
+# Ignore all virtual environment folders
+venv/
+**/venv/
+ENV/
+**/ENV/
+.env/
+**/.env/
+# Byte-compiled / optimized / DLL files
+**/__pycache__/
+*.py[cod]
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+# Logs
+*.log
+# OS generated files
+.DS_Store
+Thumbs.db
+
+

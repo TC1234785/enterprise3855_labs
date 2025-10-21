@@ -49,3 +49,6 @@
 2025-10-16 01:55:53,755 - basicLogger - INFO - Response for event passenger_count (id: 1760604952535121300) has status 201
 2025-10-16 01:55:53,756 - basicLogger - INFO - Received event passenger_count with a trace id of 1760604953756770700
 2025-10-16 01:55:54,830 - basicLogger - INFO - Response for event passenger_count (id: 1760604953756770700) has status 201
+2025-10-17 21:35:02,739 - basicLogger - INFO - Starting Receiver Service on port 8080
+2025-10-17 22:01:08,639 - basicLogger - INFO - Starting Receiver Service on port 8080
+2025-10-17 22:33:20,951 - basicLogger - INFO - Starting Receiver Service on port 8080
