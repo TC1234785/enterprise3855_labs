@@ -1,8 +1,8 @@
-openapi: 3.0.3
+openapi: 3.0.0
 info:
-  description: This API receives active event_stats
+  description: This API provides event stats
   version: "1.0.0"
-  title: NA train Information
+  title: Stats API
   contact:
     email: tchau29@my.bcit.ca
 paths:
@@ -17,35 +17,45 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                items:
-                  $ref: '#/components/schemas/ReadingStats'
+                $ref: '#/components/schemas/ReadingStats'
         '400':
-          description: 'invalid input, object invalid'
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Statistics do not exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 
 components:
   schemas:
     ReadingStats:
       required:
       - num_wait_time_readings
-      - min_wait_time
-      - max_wait_time
-      - num_passengers
+      - num_passengers_readings
       - max_passengers
+      - min_wait_time
       properties:
         num_wait_time_readings:
           type: integer
-          example: 500000
+          example: 12345
+        num_passengers_readings:
+          type: integer
+          example: 67890
+        max_passengers:
+          type: integer
+          example: 120
         min_wait_time:
           type: integer
           example: 1
-        max_wait_time:
-          type: integer
-          example: 60
-        num_passengers:
-          type: integer
-          example: 15
-        max_passengers:
-          type: integer
-          example: 50
       type: object

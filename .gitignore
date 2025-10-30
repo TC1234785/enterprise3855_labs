@@ -19,3 +19,7 @@ dist/
 Thumbs.db
 
 
+# Ignore the reference project folder completely (if present inside this repo)
+herman/
+
+

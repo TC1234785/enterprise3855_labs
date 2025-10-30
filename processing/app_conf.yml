@@ -8,6 +8,9 @@ events:
   wait_time:
     url: http://localhost:8090/na_train/incoming_train
 
+data_store:
+  filename: data.json
+
 
 
 

@@ -7,8 +7,7 @@ import logging.config
 from apscheduler.schedulers.background import BackgroundScheduler
 import os
 import json
-from datetime import datetime
-import time
+from datetime import datetime, timezone
 
 # Load configuration file
 with open('app_conf.yml', 'r') as f:
@@ -21,15 +20,35 @@ with open("log_conf.yml", "r") as f:
 logging.config.dictConfig(log_config)
 logger = logging.getLogger('basicLogger')     
 
-def get_stats(): 
-    return
+def get_stats():
+    """Return the current statistics object as defined in OpenAPI."""
+    logger.info("Received request for statistics")
+    data_file = app_config.get('data_store', {}).get('filename', 'data.json')
+    # If stats file doesn't exist, return 404 as per requirement
+    if not os.path.isfile(data_file):
+        logger.error("Statistics file does not exist: %s", data_file)
+        return {"message": "Statistics do not exist"}, 404
+
+    # Read stats and filter to API schema keys only
+    with open(data_file, 'r') as f:
+        data = json.load(f)
+    logger.debug("Current statistics: %s", data)
+    resp = {
+        'num_wait_time_readings': data.get('num_wait_time_readings', 0),
+        'num_passengers_readings': data.get('num_passengers_readings', 0),
+        'max_passengers': data.get('max_passengers', 0),
+        'min_wait_time': data.get('min_wait_time', 0)
+    }
+    logger.info("Successfully processed statistics request")
+    return resp, 200
 
 def populate_stats():
-    logger.info(f"Periodic processing has started")
-    current_time = datetime.now().isoformat(sep=" ", timespec="seconds")
+    logger.info("Periodic processing has started")
+    current_time = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    data_file = app_config.get('data_store', {}).get('filename', 'data.json')
     
-    if os.path.isfile('data.json'):
-        with open("data.json", "r") as file:
+    if os.path.isfile(data_file):
+        with open(data_file, "r") as file:
             data = json.load(file)
             params= {'start_timestamp' : data['last_updated'], 'end_timestamp': current_time}
             passenger_response = httpx.get(app_config['events']['passenger_count']['url'],params=params)
@@ -38,41 +57,69 @@ def populate_stats():
             stats = {
                 'num_wait_time_readings': data['num_wait_time_readings'],
                 'min_wait_time' : data['min_wait_time'],
-                'max_wait_time' : data['max_wait_time'],
-                'num_passengers' : data['num_passengers'],
+                'num_passengers_readings' : data['num_passengers_readings'],
                 'max_passengers' : data['max_passengers']
             }
             if passenger_response.status_code != 200 or wait_response.status_code != 200:
-                logger.error(f"It's borked")
+                if passenger_response.status_code != 200:
+                    logger.error("Storage GET passenger_count failed. status: %s", passenger_response.status_code)
+                if wait_response.status_code != 200:
+                    logger.error("Storage GET wait_time failed. status: %s", wait_response.status_code)
+                logger.info("Periodic processing has ended (with errors)")
+                return
             else:
                 cumulative_passenger = len(passenger_response.json())
-                logger.info(f"Passenger Events Logged: {cumulative_passenger}")
+                logger.info("Passenger events received: %d", cumulative_passenger)
                 cumulative_wait = len(wait_response.json())
-                logger.info(f"Wait Time Events Logged: {cumulative_wait}")
-                print('passenger',passenger_response.json())
-                print('wait',wait_response.json())
+                logger.info("Wait time events received: %d", cumulative_wait)
+                # Update cumulative counts
+                stats['num_passengers_readings'] = stats.get('num_passengers_readings', 0) + cumulative_passenger
+                stats['num_wait_time_readings'] = stats.get('num_wait_time_readings', 0) + cumulative_wait
 
+                # Update max_passengers from returned passenger events
+                for ev in passenger_response.json():
+                    # ev may contain either 'passenger_count' (reading) or 'average' (event)
+                    val = ev.get('passenger_count') if 'passenger_count' in ev else ev.get('average')
+                    if isinstance(val, (int, float)):
+                        stats['max_passengers'] = max(stats.get('max_passengers', 0), int(val))
 
-            # new_num_passenger = data['num_passengers'] + len(passenger_response)
-            # new_num_wait = data['num_wait_time'] + len(wait_response)
+                # Update min_wait_time from returned wait events
+                for ev in wait_response.json():
+                    # ev may contain either 'current_minutes_wait' (reading) or 'average' (event)
+                    val = ev.get('current_minutes_wait') if 'current_minutes_wait' in ev else ev.get('average')
+                    if isinstance(val, (int, float)):
+                        if stats.get('min_wait_time') in (None, 0):
+                            stats['min_wait_time'] = int(val)
+                        else:
+                            stats['min_wait_time'] = min(stats['min_wait_time'], int(val))
 
-            
-            #max passenger reading
-            # for i in passenger_response:
-            #     if data[]
+            # Persist stats and last_updated to the window end to avoid double-counting on inclusive queries
+            stats['last_updated'] = str(current_time)
+            logger.debug("Updated stats: %s", stats)
+            with open(data_file, 'w') as f:
+                json.dump(stats, f, indent=4)
+            # Emit a concise INFO summary so it's visible with current log level
+            logger.info(
+                "Totals so far - Passenger Readings=%d, Wait Time Readings=%d",
+                stats.get('num_passengers_readings', 0),
+                stats.get('num_wait_time_readings', 0)
+            )
+            logger.info("Periodic processing has ended")
 
-            
 
     else:
-        stats = {'num_wait_time_readings': None,
-                'min_wait_time' : None,
-                'max_wait_time' : None,
-                'num_passengers' : None,
-                'max_passengers' : None,
-                'last_updated' : str(current_time)
-                }
-        with open("data.json", "w") as f:
+        # No existing JSON: initialize defaults and use current time
+        stats = {
+            'num_wait_time_readings': 0,
+            'min_wait_time': 0,
+            'num_passengers_readings': 0,
+            'max_passengers': 0,
+            'last_updated': str(current_time)
+        }
+        with open(data_file, "w") as f:
             json.dump(stats, f, indent=4)
+        logger.debug("Initialized stats file with: %s", stats)
+        logger.info("Periodic processing has ended (initialized)")
     
 
 def init_scheduler():
