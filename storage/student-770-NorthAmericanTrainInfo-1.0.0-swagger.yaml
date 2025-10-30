@@ -48,7 +48,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PassengerReading'
+                  $ref: '#/components/schemas/PassengerCountEvent'
 
   /na_train/incoming_train:
     post:
@@ -92,11 +92,80 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/IncomingTrainReading'
+                  $ref: '#/components/schemas/WaitTimeEvent'
         
 
 components:
   schemas:
+    PassengerCountEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        trace_id:
+          type: integer
+          format: int64
+          example: 1632934353001234567
+        station_id:
+          type: string
+          format: uuid
+          example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        station_name:
+          type: string
+          example: "Yellowknife North"
+        transit_system:
+          type: string
+          example: "Metro Vancouver"
+        average:
+          type: number
+          example: 42
+        num_values:
+          type: integer
+          example: 1
+        batch_timestamp:
+          type: string
+          format: date-time
+          example: "2016-08-29T09:12:33.001Z"
+        date_created:
+          type: string
+          format: date-time
+          example: "2016-08-29T09:12:33.001Z"
+
+    WaitTimeEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        trace_id:
+          type: integer
+          format: int64
+          example: 1632934353001234567
+        station_id:
+          type: string
+          format: uuid
+          example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        station_name:
+          type: string
+          example: "Yellowknife North"
+        transit_system:
+          type: string
+          example: "Metro Vancouver"
+        average:
+          type: number
+          example: 5
+        num_values:
+          type: integer
+          example: 1
+        batch_timestamp:
+          type: string
+          format: date-time
+          example: "2016-08-29T09:12:33.001Z"
+        date_created:
+          type: string
+          format: date-time
+          example: "2016-08-29T09:12:33.001Z"
     PassengerReading:
       required:
         - trace_id

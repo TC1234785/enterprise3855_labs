@@ -16,6 +16,24 @@ class PassengerCountEvent(Base):
     batch_timestamp = mapped_column(DateTime, nullable=False)
     date_created = mapped_column(DateTime, nullable=False, default=func.now())
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "trace_id": self.trace_id,
+            "station_id": self.station_id,
+            "station_name": self.station_name,
+            "transit_system": self.transit_system,
+            "average": self.average,
+            "num_values": self.num_values,
+            "batch_timestamp": self.batch_timestamp.isoformat() if self.batch_timestamp else None,
+            "date_created": self.date_created.isoformat() if self.date_created else None,
+        }
+
+    def to_id_dict(self):
+        return {
+            "trace_id": self.trace_id
+        }
+
 class WaitTimeEvent(Base):
     __tablename__ = "wait_time_event"
     id = mapped_column(Integer, primary_key=True)
@@ -27,3 +45,21 @@ class WaitTimeEvent(Base):
     num_values = mapped_column(Integer, nullable=False)
     batch_timestamp = mapped_column(DateTime, nullable=False)
     date_created = mapped_column(DateTime, nullable=False, default=func.now())
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "trace_id": self.trace_id,
+            "station_id": self.station_id,
+            "station_name": self.station_name,
+            "transit_system": self.transit_system,
+            "average": self.average,
+            "num_values": self.num_values,
+            "batch_timestamp": self.batch_timestamp.isoformat() if self.batch_timestamp else None,
+            "date_created": self.date_created.isoformat() if self.date_created else None,
+        }
+
+    def to_id_dict(self):
+        return {
+            "trace_id": self.trace_id
+        }

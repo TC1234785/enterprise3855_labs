@@ -6,7 +6,7 @@ import yaml
 import logging
 import logging.config
 from datetime import datetime as dt
-from datetime import date
+from datetime import date, timezone
 
 from event_models import PassengerCountEvent, WaitTimeEvent  
 from sqlalchemy import create_engine, select  
@@ -73,15 +73,20 @@ def report_count_reading(session, body):
 def get_passenger_count_readings(session,start_timestamp, end_timestamp):
     """ Gets new passenger_count readings between the start and end timestamps """
 
-    start = dt.fromisoformat(start_timestamp)
-    end = dt.fromisoformat(end_timestamp)
+    # Use dateutil to support ISO-8601 with 'Z' suffix and various precisions
+    start = parser.isoparse(start_timestamp)
+    end = parser.isoparse(end_timestamp)
+    # Normalize to naive UTC to match DB timestamps (MySQL container typically stores NOW() in UTC)
+    if start.tzinfo is not None:
+        start = start.astimezone(timezone.utc).replace(tzinfo=None)
+    if end.tzinfo is not None:
+        end = end.astimezone(timezone.utc).replace(tzinfo=None)
 
     statement = select(PassengerCountEvent).where(PassengerCountEvent.date_created >= start).where(PassengerCountEvent.date_created < end)
     results = [result.to_dict()
         for result in session.execute(statement).scalars().all()
         ]
-    session.close()
-    logger.debug("Found %d PassengerCountEvent pressure readings (start: %s, end: %s)", len(results), start, end)
+    logger.debug("Found %d PassengerCountEvent readings (start: %s, end: %s)", len(results), start, end)
     return results
 
 @use_db_session
@@ -110,16 +115,19 @@ def report_wait_time_reading(session, body):
 def get_wait_time_reading(session,start_timestamp, end_timestamp):
     """ Gets new wait_time readings between the start and end timestamps """
 
-    start = dt.fromisoformat(start_timestamp)
-    end = dt.fromisoformat(end_timestamp)
-    print(type(start), 'Start:',start)
-    print(type(end), 'End:', end)
+    # Use dateutil to support ISO-8601 with 'Z' suffix and various precisions
+    start = parser.isoparse(start_timestamp)
+    end = parser.isoparse(end_timestamp)
+    # Normalize to naive UTC to match DB timestamps (MySQL container typically stores NOW() in UTC)
+    if start.tzinfo is not None:
+        start = start.astimezone(timezone.utc).replace(tzinfo=None)
+    if end.tzinfo is not None:
+        end = end.astimezone(timezone.utc).replace(tzinfo=None)
     statement = select(WaitTimeEvent).where(WaitTimeEvent.date_created >= start).where(WaitTimeEvent.date_created < end)
     results = [result.to_dict()
         for result in session.execute(statement).scalars().all()
         ]
-    session.close()
-    logger.debug("Found %d WaitTimeEvent pressure readings (start: %s, end: %s)", len(results), start, end)
+    logger.debug("Found %d WaitTimeEvent readings (start: %s, end: %s)", len(results), start, end)
     return results
 
 app = connexion.FlaskApp(__name__, specification_dir='')  
