@@ -5,6 +5,12 @@ import os
 import yaml
 import logging
 import logging.config
+import json
+import datetime
+import time
+from pykafka import KafkaClient
+from pykafka.common import OffsetType
+import threading
 from datetime import datetime as dt
 from datetime import date, timezone
 
@@ -132,6 +138,53 @@ def get_wait_time_reading(session,start_timestamp, end_timestamp):
 
 app = connexion.FlaskApp(__name__, specification_dir='')  
 app.add_api("student-770-NorthAmericanTrainInfo-1.0.0-swagger.yaml", strict_validation=True, validate_responses=True)  # Add OpenAPI spec
+
+def process_messages():
+    """Process event messages from Kafka and store them in the DB."""
+    hostname = f"{app_config['events']['hostname']}:{app_config['events']['port']}"
+    logger.info("Kafka consumer loop starting; target broker=%s topic=%s",
+                hostname, app_config['events']['topic'])
+    while True:
+        try:
+            client = KafkaClient(hosts=hostname)
+            topic = client.topics[str.encode(app_config['events']['topic'])]
+
+            consumer = topic.get_simple_consumer(
+                consumer_group=b'event_group',
+                reset_offset_on_start=False,
+                auto_offset_reset=OffsetType.LATEST
+            )
+            logger.info("Started Kafka consumer for topic %s on %s", app_config['events']['topic'], hostname)
+
+            for msg in consumer:
+                if msg is None:
+                    continue
+                msg_str = msg.value.decode('utf-8')
+                msg_obj = json.loads(msg_str)
+                logger.info("Message: %s", msg_obj)
+                payload = msg_obj.get('payload')
+                mtype = msg_obj.get('type')
+
+                # Dispatch based on message type
+                if mtype == 'passenger_count' or mtype == 'event1':
+                    report_count_reading(payload)
+                elif mtype == 'wait_time' or mtype == 'event2':
+                    report_wait_time_reading(payload)
+
+                # commit that we've processed this message
+                consumer.commit_offsets()
+
+        except Exception as e:
+            logger.error("Kafka consumer error (%s). Retrying in 5s...", e)
+            time.sleep(5)
+
+
+def setup_kafka_thread():
+    t1 = threading.Thread(target=process_messages)
+    t1.daemon = True  # setDaemon is deprecated
+    logger.info("Launching Kafka consumer background thread")
+    t1.start()
+
 if __name__ == "__main__":
-    logger.info("Starting Storage Service on port 8090")
+    setup_kafka_thread()
     app.run(port=8090)  

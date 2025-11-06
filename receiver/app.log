@@ -103,3 +103,6 @@
 2025-10-30 10:46:12,270 - basicLogger - INFO - Received event passenger_count with 1 readings
 2025-10-30 10:46:12,270 - basicLogger - INFO - Received event passenger_count with a trace id of 1761846372270043400
 2025-10-30 10:46:13,328 - basicLogger - INFO - Response for event passenger_count (id: 1761846372270043400) has status 201
+2025-11-06 03:08:38,035 - basicLogger - INFO - Connected to Kafka brokers at 127.0.0.1:9092, topic=events
+2025-11-06 03:08:38,068 - basicLogger - INFO - Starting Receiver Service on port 8080
+2025-11-06 03:08:39,165 - basicLogger - INFO - Connected to Kafka brokers at 127.0.0.1:9092, topic=events

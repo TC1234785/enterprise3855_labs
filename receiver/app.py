@@ -1,10 +1,12 @@
 import connexion                
 from connexion import NoContent 
-import httpx
 import time
+import json
+import datetime
 import yaml
 import logging
 import logging.config
+from pykafka import KafkaClient
 
 # Load configuration file
 with open('app_conf.yml', 'r') as f:
@@ -16,6 +18,13 @@ with open("log_conf.yml", "r") as f:
     
 logging.config.dictConfig(log_config)
 logger = logging.getLogger('basicLogger')        
+
+# Kafka client/producer setup (use hostname/port/topic from app_conf.yml)
+kafka_hosts = f"{app_config['events']['hostname']}:{app_config['events']['port']}"
+client = KafkaClient(hosts=kafka_hosts)
+topic = client.topics[str.encode(app_config['events']['topic'])]
+kafka_producer = topic.get_sync_producer()
+logger.info(f"Connected to Kafka brokers at {kafka_hosts}, topic={app_config['events']['topic']}")
 
 def report_count_readings(body):
     # Receives batch passenger count readings and forwards each individual reading to the storage service.
@@ -40,12 +49,16 @@ def report_count_readings(body):
             "recorded_timestamp": reading.get("recorded_timestamp")
         }
 
-        # Send to storage service
-        response = httpx.post(app_config['events'][event_type]['url'], json=event_data)
-        logger.info(f"Response for event {event_type} (id: {trace_id}) has status {response.status_code}")
-        if response.status_code != 201:
-            return NoContent, response.status_code
+        # Produce to Kafka instead of calling storage
+        msg = {
+            "type": "passenger_count",
+            "datetime": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+            "payload": event_data
+        }
+        kafka_producer.produce(json.dumps(msg).encode('utf-8'))
+        logger.info(f"Produced passenger_count message with trace_id={trace_id}")
 
+    # Always return 201 as per async design
     return NoContent, 201
 
 def report_wait_time_reading(body):
@@ -72,12 +85,16 @@ def report_wait_time_reading(body):
             "recorded_timestamp": reading.get("recorded_timestamp")
         }
 
-        # Send to storage service
-        response = httpx.post(app_config['events'][event_type]['url'], json=event_data)
-        logger.info(f"Response for event {event_type} (id: {trace_id}) has status {response.status_code}")
-        if response.status_code != 201:
-            return NoContent, response.status_code
+        # Produce to Kafka instead of calling storage
+        msg = {
+            "type": "wait_time",
+            "datetime": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+            "payload": event_data
+        }
+        kafka_producer.produce(json.dumps(msg).encode('utf-8'))
+        logger.info(f"Produced wait_time message with trace_id={trace_id}")
 
+    # Always return 201 as per async design
     return NoContent, 201
 
 app = connexion.FlaskApp(__name__, specification_dir='') 

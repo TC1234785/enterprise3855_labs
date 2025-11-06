@@ -5,3 +5,7 @@ datastore:
   hostname: localhost
   port: 3306
   db: traindb
+events:
+  hostname: 127.0.0.1
+  port: 9092
+  topic: events 

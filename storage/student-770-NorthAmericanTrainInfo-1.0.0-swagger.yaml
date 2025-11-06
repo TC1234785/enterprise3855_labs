@@ -7,20 +7,6 @@ info:
     email: tchau29@my.bcit.ca
 paths:
   /na_train/passenger_count:
-    post:
-      summary: Reports a single passenger_count sensor reading
-      operationId: app.report_count_reading
-      description: Adds a single passenger_count reading
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PassengerReading'
-      responses:
-        '201':
-          description: reading successfully received
-        '400':
-          description: 'invalid input, object invalid'
     get:
       summary: Get new passenger_count_readings events
       operationId: app.get_passenger_count_readings
@@ -51,20 +37,6 @@ paths:
                   $ref: '#/components/schemas/PassengerCountEvent'
 
   /na_train/incoming_train:
-    post:
-      summary: Reports a single incoming_train reading
-      operationId: app.report_wait_time_reading
-      description: Adds a single incoming_train reading
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IncomingTrainReading'
-      responses:
-        '201':
-          description: reading successfully received
-        '400':
-          description: 'invalid input, object invalid'
     get:
       summary: Get new wait_time events
       operationId: app.get_wait_time_reading
