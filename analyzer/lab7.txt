@@ -1,0 +1,12 @@
+To test analyzer, start receiver, storage, and analyzer python
+
+Send any event through jmeter
+
+Then, access analyzer through the following browser links:
+Put any index you want for the below
+http://127.0.0.1:8110/na_train/passenger_count?index=<index>
+http://127.0.0.1:8110/na_train/incoming_train?index=<index>
+
+Gets the amalgamation of final reading numbers
+http://127.0.0.1:8110/stats
+

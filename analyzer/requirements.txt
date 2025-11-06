@@ -1,0 +1,7 @@
+connexion[flask]==3.3.0
+a2wsgi==1.10.10
+Flask==3.1.2
+PyYAML==6.0.3
+uvicorn==0.37.0
+starlette==0.48.0
+pykafka==2.8.0

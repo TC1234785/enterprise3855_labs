@@ -1,0 +1,155 @@
+openapi: 3.0.3
+info:
+  title: Analyzer Service
+  version: "1.0.0"
+  description: Inspect Kafka events for passenger_count and wait_time
+paths:
+  /na_train/passenger_count:
+    get:
+      summary: Get passenger_count event by index
+      operationId: app.get_passenger_event
+      parameters:
+        - name: index
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+      responses:
+        '200':
+          description: Passenger event found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PassengerReading'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '404':
+          description: Event not found at index
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+  /na_train/incoming_train:
+    get:
+      summary: Get wait_time event by index
+      operationId: app.get_wait_time_event
+      parameters:
+        - name: index
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+      responses:
+        '200':
+          description: Wait time event found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncomingTrainReading'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '404':
+          description: Event not found at index
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+  /stats:
+    get:
+      summary: Get counts of events in Kafka topic
+      operationId: app.get_stats
+      responses:
+        '200':
+          description: Statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stats'
+components:
+  schemas:
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
+    PassengerReading:
+      type: object
+      required:
+        - trace_id
+        - station_id
+        - station_name
+        - transit_system
+        - passenger_count
+        - batch_timestamp
+        - recorded_timestamp
+      properties:
+        trace_id:
+          type: integer
+          format: int64
+        station_id:
+          type: string
+          format: uuid
+        station_name:
+          type: string
+        transit_system:
+          type: string
+        passenger_count:
+          type: number
+        batch_timestamp:
+          type: string
+          format: date-time
+        recorded_timestamp:
+          type: string
+          format: date-time
+    IncomingTrainReading:
+      type: object
+      required:
+        - trace_id
+        - station_id
+        - station_name
+        - transit_system
+        - current_minutes_wait
+        - active_alerts
+        - batch_timestamp
+        - recorded_timestamp
+      properties:
+        trace_id:
+          type: integer
+          format: int64
+        station_id:
+          type: string
+          format: uuid
+        station_name:
+          type: string
+        transit_system:
+          type: string
+        current_minutes_wait:
+          type: number
+        active_alerts:
+          type: string
+          enum: [none, maintenance_needed, full, alarm_active, other]
+        batch_timestamp:
+          type: string
+          format: date-time
+        recorded_timestamp:
+          type: string
+          format: date-time
+    Stats:
+      type: object
+      properties:
+        num_passenger_readings:
+          type: integer
+          example: 189
+        num_wait_time_readings:
+          type: integer
+          example: 213

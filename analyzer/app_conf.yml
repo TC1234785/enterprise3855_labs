@@ -1,0 +1,7 @@
+version: 1
+events:
+  hostname: 127.0.0.1
+  port: 9092
+  topic: events
+server:
+  port: 8110

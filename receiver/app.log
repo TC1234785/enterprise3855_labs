@@ -106,3 +106,55 @@
 2025-11-06 03:08:38,035 - basicLogger - INFO - Connected to Kafka brokers at 127.0.0.1:9092, topic=events
 2025-11-06 03:08:38,068 - basicLogger - INFO - Starting Receiver Service on port 8080
 2025-11-06 03:08:39,165 - basicLogger - INFO - Connected to Kafka brokers at 127.0.0.1:9092, topic=events
+2025-11-06 03:17:08,792 - basicLogger - INFO - Received event passenger_count with 1 readings
+2025-11-06 03:17:08,793 - basicLogger - INFO - Received event passenger_count with a trace id of 1762427828793280400
+2025-11-06 03:17:08,840 - basicLogger - INFO - Produced passenger_count message with trace_id=1762427828793280400
+2025-11-06 03:17:11,015 - basicLogger - INFO - Received event passenger_count with 1 readings
+2025-11-06 03:17:11,015 - basicLogger - INFO - Received event passenger_count with a trace id of 1762427831015510600
+2025-11-06 03:17:11,025 - basicLogger - INFO - Produced passenger_count message with trace_id=1762427831015510600
+2025-11-06 03:17:19,457 - basicLogger - INFO - Received event wait_time with 1 readings
+2025-11-06 03:17:19,457 - basicLogger - INFO - Received event wait_time with a trace id of 1762427839457229000
+2025-11-06 03:17:19,466 - basicLogger - INFO - Produced wait_time message with trace_id=1762427839457229000
+2025-11-06 03:17:21,065 - basicLogger - INFO - Received event wait_time with 1 readings
+2025-11-06 03:17:21,066 - basicLogger - INFO - Received event wait_time with a trace id of 1762427841066820000
+2025-11-06 03:17:21,077 - basicLogger - INFO - Produced wait_time message with trace_id=1762427841066820000
+2025-11-06 03:18:19,584 - basicLogger - INFO - Received event passenger_count with 1 readings
+2025-11-06 03:18:19,585 - basicLogger - INFO - Received event passenger_count with a trace id of 1762427899585201800
+2025-11-06 03:18:19,592 - basicLogger - INFO - Produced passenger_count message with trace_id=1762427899585201800
+2025-11-06 03:18:20,398 - basicLogger - INFO - Received event passenger_count with 1 readings
+2025-11-06 03:18:20,398 - basicLogger - INFO - Received event passenger_count with a trace id of 1762427900398893500
+2025-11-06 03:18:20,408 - basicLogger - INFO - Produced passenger_count message with trace_id=1762427900398893500
+2025-11-06 03:18:20,986 - basicLogger - INFO - Received event passenger_count with 1 readings
+2025-11-06 03:18:20,987 - basicLogger - INFO - Received event passenger_count with a trace id of 1762427900986996500
+2025-11-06 03:18:20,994 - basicLogger - INFO - Produced passenger_count message with trace_id=1762427900986996500
+2025-11-06 03:18:21,538 - basicLogger - INFO - Received event passenger_count with 1 readings
+2025-11-06 03:18:21,538 - basicLogger - INFO - Received event passenger_count with a trace id of 1762427901538989400
+2025-11-06 03:18:21,545 - basicLogger - INFO - Produced passenger_count message with trace_id=1762427901538989400
+2025-11-06 03:18:22,064 - basicLogger - INFO - Received event passenger_count with 1 readings
+2025-11-06 03:18:22,065 - basicLogger - INFO - Received event passenger_count with a trace id of 1762427902065551100
+2025-11-06 03:18:22,080 - basicLogger - INFO - Produced passenger_count message with trace_id=1762427902065551100
+2025-11-06 03:18:25,490 - basicLogger - INFO - Received event wait_time with 1 readings
+2025-11-06 03:18:25,490 - basicLogger - INFO - Received event wait_time with a trace id of 1762427905490384900
+2025-11-06 03:18:25,497 - basicLogger - INFO - Produced wait_time message with trace_id=1762427905490384900
+2025-11-06 03:18:26,052 - basicLogger - INFO - Received event wait_time with 1 readings
+2025-11-06 03:18:26,052 - basicLogger - INFO - Received event wait_time with a trace id of 1762427906052231800
+2025-11-06 03:18:26,061 - basicLogger - INFO - Produced wait_time message with trace_id=1762427906052231800
+2025-11-06 03:18:26,543 - basicLogger - INFO - Received event wait_time with 1 readings
+2025-11-06 03:18:26,543 - basicLogger - INFO - Received event wait_time with a trace id of 1762427906543092400
+2025-11-06 03:18:26,548 - basicLogger - INFO - Produced wait_time message with trace_id=1762427906543092400
+2025-11-06 03:18:27,072 - basicLogger - INFO - Received event wait_time with 1 readings
+2025-11-06 03:18:27,078 - basicLogger - INFO - Received event wait_time with a trace id of 1762427907078961700
+2025-11-06 03:18:27,085 - basicLogger - INFO - Produced wait_time message with trace_id=1762427907078961700
+2025-11-06 03:18:27,505 - basicLogger - INFO - Received event wait_time with 1 readings
+2025-11-06 03:18:27,506 - basicLogger - INFO - Received event wait_time with a trace id of 1762427907506192800
+2025-11-06 03:18:27,515 - basicLogger - INFO - Produced wait_time message with trace_id=1762427907506192800
+2025-11-06 04:33:36,048 - basicLogger - INFO - Received event passenger_count with 2 readings
+2025-11-06 04:33:36,049 - basicLogger - INFO - Received event passenger_count with a trace id of 1762432416049291100
+2025-11-06 04:33:36,189 - basicLogger - INFO - Produced passenger_count message with trace_id=1762432416049291100
+2025-11-06 04:33:36,189 - basicLogger - INFO - Received event passenger_count with a trace id of 1762432416189912300
+2025-11-06 04:33:36,197 - basicLogger - INFO - Produced passenger_count message with trace_id=1762432416189912300
+2025-11-06 04:34:01,222 - basicLogger - INFO - Received event wait_time with 2 readings
+2025-11-06 04:34:01,223 - basicLogger - INFO - Received event wait_time with a trace id of 1762432441223848900
+2025-11-06 04:34:01,227 - basicLogger - INFO - Produced wait_time message with trace_id=1762432441223848900
+2025-11-06 04:34:01,228 - basicLogger - INFO - Received event wait_time with a trace id of 1762432441228700600
+2025-11-06 04:34:01,235 - basicLogger - INFO - Produced wait_time message with trace_id=1762432441228700600
