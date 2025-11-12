@@ -1,0 +1,8 @@
+#This switches ONLY the DB back to a named volume when you run with the override (this is to work around a known MySQL-on-NTFS bind-mount issue on Windows).Keeps the base compose compliant with your policy.
+services:
+  db:
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:

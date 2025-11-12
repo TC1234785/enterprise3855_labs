@@ -1,5 +1,0 @@
-version: 2
-events:
-  hostname: 127.0.0.1
-  port: 9092
-  topic: events 

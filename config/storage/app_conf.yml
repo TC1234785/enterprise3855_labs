@@ -1,0 +1,11 @@
+version: 1
+datastore:
+  user: root
+  password: password
+  hostname: db
+  port: 3306
+  db: traindb
+events:
+  hostname: kafka
+  port: 29092
+  topic: events

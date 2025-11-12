@@ -8,14 +8,17 @@ import logging
 import logging.config
 from pykafka import KafkaClient
 
-# Load configuration file
-with open('app_conf.yml', 'r') as f:
+# Load configuration file from shared config mount (per-service folder)
+with open('/config/receiver/app_conf.yml', 'r') as f:
     app_config = yaml.safe_load(f.read())
 
-# Load logging configuration
-with open("log_conf.yml", "r") as f:
+# Load logging configuration and set per-service logfile under /logs
+with open('/config/log_conf.yml', 'r') as f:
     log_config = yaml.safe_load(f.read())
-    
+    # ensure logs go to service-specific file
+    if 'handlers' in log_config and 'file' in log_config['handlers']:
+        log_config['handlers']['file']['filename'] = '/logs/receiver.log'
+
 logging.config.dictConfig(log_config)
 logger = logging.getLogger('basicLogger')        
 
@@ -101,4 +104,5 @@ app = connexion.FlaskApp(__name__, specification_dir='')
 app.add_api("student-770-NorthAmericanTrainInfo-1.0.0-swagger.yaml", strict_validation=True, validate_responses=True) 
 if __name__ == "__main__":
     logger.info("Starting Receiver Service on port 8080")
-    app.run(port=8080)        
+    # Bind to 0.0.0.0 so Docker can expose the port outside the container
+    app.run(host="0.0.0.0", port=8080)        

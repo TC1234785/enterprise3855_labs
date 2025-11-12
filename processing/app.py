@@ -9,14 +9,15 @@ import os
 import json
 from datetime import datetime, timezone
 
-# Load configuration file
-with open('app_conf.yml', 'r') as f:
+# Load configuration file from shared config mount (per-service folder)
+with open('/config/processing/app_conf.yml', 'r') as f:
     app_config = yaml.safe_load(f.read())
 
-# Load logging configuration
-with open("log_conf.yml", "r") as f:
+# Load logging configuration and set per-service logfile under /logs
+with open('/config/log_conf.yml', 'r') as f:
     log_config = yaml.safe_load(f.read())
-    
+    if 'handlers' in log_config and 'file' in log_config['handlers']:
+        log_config['handlers']['file']['filename'] = '/logs/processing.log'
 logging.config.dictConfig(log_config)
 logger = logging.getLogger('basicLogger')     
 
@@ -135,4 +136,5 @@ app.add_api("student-770-NorthAmericanTrainInfo-1.0.0-swagger.yaml", strict_vali
 if __name__ == "__main__":
     logger.info("Starting Processing Service on port 8100")
     init_scheduler()
-    app.run(port=8100)        
+    # Bind to 0.0.0.0 so Docker can expose the port outside the container
+    app.run(host="0.0.0.0", port=8100)        

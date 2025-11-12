@@ -6,12 +6,14 @@ import logging.config
 from connexion import NoContent
 from pykafka import KafkaClient
 
-# Load configuration
-with open('app_conf.yml', 'r') as f:
+# Load configuration from shared config mount (per-service folder)
+with open('/config/analyzer/app_conf.yml', 'r') as f:
     app_config = yaml.safe_load(f.read())
 
-with open('log_conf.yml', 'r') as f:
+with open('/config/log_conf.yml', 'r') as f:
     log_config = yaml.safe_load(f.read())
+    if 'handlers' in log_config and 'file' in log_config['handlers']:
+        log_config['handlers']['file']['filename'] = '/logs/analyzer.log'
 logging.config.dictConfig(log_config)
 logger = logging.getLogger('basicLogger')
 
@@ -79,4 +81,5 @@ app.add_api('openapi.yaml', strict_validation=True, validate_responses=True)
 
 if __name__ == '__main__':
     logger.info("Starting Analyzer on port %d", app_config['server']['port'])
-    app.run(port=app_config['server']['port'])
+    # Bind to 0.0.0.0 so Docker can expose the port outside the container
+    app.run(host="0.0.0.0", port=app_config['server']['port'])

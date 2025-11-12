@@ -5,21 +5,47 @@ ENV/
 **/ENV/
 .env/
 **/.env/
-# Byte-compiled / optimized / DLL files
+
+# Python caches and compiled files
 **/__pycache__/
 *.py[cod]
+.pytest_cache/
+.mypy_cache/
+.pytype/
+.coverage*
+.cache/
+
 # Distribution / packaging
 build/
 dist/
 *.egg-info/
+
 # Logs
 *.log
+# Central logs directory created by containers (keep README)
+logs/
+!logs/README.md
+
+# Data bind mounts and generated state (keep README)
+data/database/
+data/kafka/
+data/processing/
+data/zookeeper/
+!data/README.md
+
+# Service-generated files
+processing/data.json
+
 # OS generated files
 .DS_Store
 Thumbs.db
 
-
 # Ignore the reference project folder completely (if present inside this repo)
 herman/
+
+# IDE/editor configs
+.vscode/
+.idea/
+*.code-workspace
 
 

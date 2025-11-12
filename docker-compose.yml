@@ -1,0 +1,88 @@
+services:
+  # Core infrastructure
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    user: "0:0"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_log:/var/lib/zookeeper/log
+
+  kafka:
+    image: wurstmeister/kafka
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_LISTENERS: INSIDE://:29092,OUTSIDE://:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:29092,OUTSIDE://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "events:1:1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/kafka:/kafka
+    depends_on:
+      - zookeeper
+
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: traindb
+    volumes:
+      - ./data/database:/var/lib/mysql
+
+  # Application services (build from local sources)
+  receiver:
+    build:
+      context: ./receiver
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kafka
+    volumes:
+      - ./config:/config:ro
+      - ./logs:/logs
+
+  storage:
+    build:
+      context: ./storage
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+      - kafka
+    volumes:
+      - ./config:/config:ro
+      - ./logs:/logs
+
+  processing:
+    build:
+      context: ./processing
+      dockerfile: Dockerfile
+    ports:
+      - "8100:8100"
+    depends_on:
+      - storage
+    volumes:
+      - ./config:/config:ro
+      - ./logs:/logs
+      - ./data/processing:/data/processing
+
+  analyzer:
+    build:
+      context: ./analyzer
+      dockerfile: Dockerfile
+    ports:
+      - "8110:8110"
+    depends_on:
+      - kafka
+    volumes:
+      - ./config:/config:ro
+      - ./logs:/logs
+
+volumes:
+  zookeeper_data:
+  zookeeper_log:

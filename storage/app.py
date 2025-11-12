@@ -21,13 +21,15 @@ from sqlalchemy.orm import sessionmaker
 # Seems like the datetime information does not get parsed correctly without this
 from dateutil import parser
 
-# Load configuration file
-with open('app_conf.yml', 'r') as f:
+# Load configuration file from shared config mount (per-service folder)
+with open('/config/storage/app_conf.yml', 'r') as f:
     app_config = yaml.safe_load(f.read())
 
-# Load logging configuration
-with open('log_conf.yml', 'r') as f:
+# Load logging configuration and set per-service logfile under /logs
+with open('/config/log_conf.yml', 'r') as f:
     log_config = yaml.safe_load(f.read())
+    if 'handlers' in log_config and 'file' in log_config['handlers']:
+        log_config['handlers']['file']['filename'] = '/logs/storage.log'
 logging.config.dictConfig(log_config)
 
 # Create logger
@@ -187,4 +189,5 @@ def setup_kafka_thread():
 
 if __name__ == "__main__":
     setup_kafka_thread()
-    app.run(port=8090)  
+    # Bind to 0.0.0.0 so Docker can expose the port outside the container
+    app.run(host="0.0.0.0", port=8090)  
