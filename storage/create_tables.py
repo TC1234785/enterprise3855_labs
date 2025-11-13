@@ -1,9 +1,13 @@
 from sqlalchemy import create_engine
 from event_models import Base
 import yaml
+import os
 
-# Load configuration file
-with open('app_conf.yml', 'r') as f:
+# Load configuration file (prefer mounted config path, fallback to local file)
+config_path = '/config/storage/app_conf.yml'
+if not os.path.isfile(config_path):
+    config_path = 'app_conf.yml'
+with open(config_path, 'r') as f:
     app_config = yaml.safe_load(f.read())
 
 # Create a database engine for MySQL using configuration
