@@ -41,6 +41,33 @@
     # ==========================================================================
     # PART 2: Git Deployment (Clone or Update)
     # ==========================================================================
+    - name: Ensure .ssh directory exists
+      ansible.builtin.file:
+        path: "/home/{{ ansible_user }}/.ssh"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0700'
+      tags: [deploy]
+
+    - name: Install deploy key for private repo
+      ansible.builtin.copy:
+        content: "{{ repo_deploy_key }}"
+        dest: "/home/{{ ansible_user }}/.ssh/deploy_key"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0600'
+      when: repo_deploy_key is defined
+      no_log: true
+      tags: [deploy]
+
+    - name: Add GitHub to known_hosts
+      ansible.builtin.known_hosts:
+        name: github.com
+        key: "{{ lookup('pipe', 'ssh-keyscan -t rsa,ecdsa,ed25519 github.com') }}"
+        path: "/home/{{ ansible_user }}/.ssh/known_hosts"
+      tags: [deploy]
+
     - name: Ensure app directory parent exists
       ansible.builtin.file:
         path: "{{ app_dir | dirname }}"
@@ -62,12 +89,15 @@
         repo: "{{ git_repo }}"
         dest: "{{ app_dir }}"
         version: "{{ git_branch }}"
+        key_file: "/home/{{ ansible_user }}/.ssh/deploy_key"
+        accept_hostkey: yes
       become: no
       when: not git_exists.stat.exists
       tags: [deploy]
 
     - name: Update existing git repository
       ansible.builtin.shell: |
+        export GIT_SSH_COMMAND="ssh -i /home/{{ ansible_user }}/.ssh/deploy_key -o StrictHostKeyChecking=no"
         cd {{ app_dir }}
         git reset --hard origin/{{ git_branch }}
         git pull origin {{ git_branch }}

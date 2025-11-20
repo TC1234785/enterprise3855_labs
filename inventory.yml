@@ -3,15 +3,16 @@
 
 all:
   hosts:
-    # REPLACE THIS with your EC2 public DNS or IP
-    44.222.107.217:
+    # EC2 public IP (ensure matches current instance)
+    44.222.107.217: {}
   vars:
     # Connection settings
+    ansible_host: 44.222.107.217
     ansible_user: ubuntu
     # SSH key in WSL home directory (better permissions than Windows mount)
     ansible_ssh_private_key_file: "~/.ssh/Microservice.pem"
     ansible_python_interpreter: /usr/bin/python3
-    
+
     # Deployment settings
     git_repo: "https://github.com/TC1234785/enterprise3855_labs.git"
     git_branch: main

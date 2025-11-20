@@ -19,7 +19,7 @@ wsl curl ifconfig.me
 Change in securitygroup
 
 Prune kafka and zookeeper
-wsl bash -c "ssh -i ~/.ssh/Microservice.pem -o StrictHostKeyChecking=no ubuntu@44.222.107.217 'cd enterprise3855_labs && docker volume prune -af && rm -rf data/kafka/* data/zookeeper/* data/zookeeper_conf/* data/zookeeper_log/*'"
+wsl bash -c "ssh -i ~/.ssh/Microservice.pem ubuntu@44.222.107.217 'cd enterprise3855_labs && docker volume prune -af && sudo rm -rf data/kafka/* data/zookeeper/* data/database/* data/processing/*'"
 
-wsl bash -c "ssh -i ~/.ssh/Microservice.pem -o StrictHostKeyChecking=no ubuntu@44.222.107.217 'cd enterprise3855_labs && sudo rm -rf data/kafka/* data/zookeeper/*'"
+Dashboard: http://44.222.107.217:3000
 

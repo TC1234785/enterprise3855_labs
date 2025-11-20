@@ -92,7 +92,12 @@ fi
 echo ""
 echo "[3/5] Testing SSH connection to EC2..."
 
-if ansible all -i inventory.yml -m ping > /dev/null 2>&1; then
+# Extract connection details from inventory (strip Windows line endings)
+EC2_IP=$(grep "ansible_host:" inventory.yml | awk '{print $2}' | tr -d '\r')
+ANSIBLE_USER=$(grep "ansible_user:" inventory.yml | awk '{print $2}' | tr -d '\r')
+
+# Simple SSH test (doesn't need vault password)
+if ssh -i "${SSH_KEY}" -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o BatchMode=yes ${ANSIBLE_USER}@${EC2_IP} exit 2>/dev/null; then
     echo -e "${GREEN}[OK]${NC} Successfully connected to EC2"
 else
     echo -e "${RED}[ERROR]${NC} Cannot connect to EC2 instance!"
@@ -120,7 +125,7 @@ echo "[4/5] Running deployment playbook..."
 echo -e "${YELLOW}TIME WARNING:${NC} This will take 3-5 minutes (Kafka initialization)"
 echo ""
 
-ansible-playbook -i inventory.yml playbook.yml
+ansible-playbook -i inventory.yml playbook.yml --ask-vault-pass
 
 if [ $? -ne 0 ]; then
     echo ""
@@ -148,7 +153,7 @@ for endpoint in "${ENDPOINTS[@]}"; do
     if curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 "http://${EC2_IP}:${PORT}/health" | grep -q "200\|404"; then
         echo -e "${GREEN}[OK]${NC} $SERVICE (port $PORT) is responding"
     else
-        echo -e "${RED}[ERROR]${NC} $SERVICE (port $PORT) is not responding"
+        echo -e "${RED}[ERROR]${NC} $SERVICE (port $PORT) is not responding (Ignore this for now. This is for assignment 1)"
         ALL_OK=false
     fi
 done
