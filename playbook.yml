@@ -1,0 +1,249 @@
+---
+- name: Deploy enterprise3855_labs to AWS EC2
+  hosts: all
+  gather_facts: yes
+  become: yes  # Run tasks with sudo
+  
+  tasks:
+    # ==========================================================================
+    # PART 1: Install Prerequisites (Docker, Git, etc.)
+    # ==========================================================================
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      tags: [prereq]
+
+    - name: Install system packages
+      ansible.builtin.apt:
+        name:
+          - docker.io
+          - docker-compose
+          - git
+          - python3-pip
+        state: present
+      tags: [prereq]
+
+    - name: Start and enable Docker service
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+        enabled: yes
+      tags: [prereq]
+
+    - name: Add ubuntu user to docker group
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+      tags: [prereq]
+
+    # ==========================================================================
+    # PART 2: Git Deployment (Clone or Update)
+    # ==========================================================================
+    - name: Ensure app directory parent exists
+      ansible.builtin.file:
+        path: "{{ app_dir | dirname }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
+      become: yes
+      tags: [deploy]
+
+    - name: Check if git repo exists
+      ansible.builtin.stat:
+        path: "{{ app_dir }}/.git"
+      register: git_exists
+      tags: [deploy]
+
+    - name: Clone git repository (first time only)
+      ansible.builtin.git:
+        repo: "{{ git_repo }}"
+        dest: "{{ app_dir }}"
+        version: "{{ git_branch }}"
+      become: no
+      when: not git_exists.stat.exists
+      tags: [deploy]
+
+    - name: Update existing git repository
+      ansible.builtin.shell: |
+        cd {{ app_dir }}
+        git reset --hard origin/{{ git_branch }}
+        git pull origin {{ git_branch }}
+      become: no
+      when: git_exists.stat.exists
+      tags: [deploy]
+      timeout: 60
+
+    # ==========================================================================
+    # PART 3: Edge Case Handling (Directories, Permissions)
+    # ==========================================================================
+    - name: Create required data directories
+      ansible.builtin.file:
+        path: "{{ app_dir }}/{{ item }}"
+        state: directory
+        mode: '0777'  # Writable by Docker containers
+      loop:
+        - data
+        - data/kafka
+        - data/processing
+        - data/zookeeper
+        - data/zookeeper_conf
+        - data/zookeeper_log
+        - logs
+      become: no
+      tags: [setup]
+      
+    - name: Ensure database directory exists (without changing ownership)
+      ansible.builtin.file:
+        path: "{{ app_dir }}/data/database"
+        state: directory
+        mode: '0777'
+      become: no
+      tags: [setup]
+      ignore_errors: yes  # MySQL might own this already
+
+    - name: Create config subdirectories
+      ansible.builtin.file:
+        path: "{{ app_dir }}/config/{{ item }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
+      loop:
+        - receiver
+        - storage
+        - processing
+        - analyzer
+      become: no
+      tags: [setup]
+
+    # ==========================================================================
+    # PART 4: Docker Volume Cleanup (Fix Kafka broker ID mismatch)
+    # ==========================================================================
+    # CRITICAL: docker-compose.yml MUST have KAFKA_BROKER_ID: 1 set!
+    # Without it, Kafka generates random IDs causing topic leader mismatch.
+    # This cleanup ensures fresh state with consistent broker ID.
+    
+    - name: Stop existing Docker Compose services
+      ansible.builtin.shell:
+        cmd: docker-compose down
+        chdir: "{{ app_dir }}"
+      become: no
+      ignore_errors: yes
+      tags: [docker]
+
+    - name: Prune unused Docker volumes
+      ansible.builtin.command:
+        cmd: docker volume prune -f
+      become: no
+      tags: [docker]
+
+    - name: Clean Kafka and Zookeeper data
+      ansible.builtin.shell:
+        cmd: sudo rm -rf {{ app_dir }}/{{ item }}/*
+      loop:
+        - data/kafka
+        - data/zookeeper
+        - data/zookeeper_log
+        - data/zookeeper_conf
+      become: no
+      ignore_errors: yes
+      tags: [docker]
+      
+    - name: Prune ALL Docker volumes (including named volumes)
+      ansible.builtin.command:
+        cmd: docker volume prune -af
+      become: no
+      tags: [docker]
+
+    - name: Recreate cleaned directories
+      ansible.builtin.file:
+        path: "{{ app_dir }}/{{ item }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0777'
+      loop:
+        - data/kafka
+        - data/zookeeper
+        - data/zookeeper_log
+        - data/zookeeper_conf
+      become: no
+      tags: [docker]
+
+    # ==========================================================================
+    # PART 5: Docker Compose Deployment
+    # ==========================================================================
+    - name: Build and start all services
+      ansible.builtin.shell:
+        cmd: docker-compose up -d --build
+        chdir: "{{ app_dir }}"
+      become: no
+      register: compose_result
+      tags: [docker]
+
+    - name: Wait for Kafka to initialize (120 seconds)
+      ansible.builtin.pause:
+        seconds: 120
+      tags: [docker]
+
+    - name: Stop receiver (will restart fresh after Kafka is ready)
+      ansible.builtin.shell:
+        cmd: docker-compose stop receiver
+        chdir: "{{ app_dir }}"
+      become: no
+      tags: [docker]
+      
+    - name: Wait additional 10 seconds for Kafka to fully stabilize
+      ansible.builtin.pause:
+        seconds: 10
+      tags: [docker]
+
+    - name: Start receiver service (now that Kafka is ready)
+      ansible.builtin.shell:
+        cmd: docker-compose up -d receiver
+        chdir: "{{ app_dir }}"
+      become: no
+      tags: [docker]
+
+    # ==========================================================================
+    # PART 6: Verification
+    # ==========================================================================
+    - name: Wait for services to stabilize
+      ansible.builtin.pause:
+        seconds: 10
+      tags: [verify]
+
+    - name: Check running containers
+      ansible.builtin.command:
+        cmd: docker ps --format "table {{'{{'}} .Names {{'}}'}}\t{{'{{'}} .Status {{'}}'}}"
+      register: docker_ps
+      changed_when: false
+      become: no
+      tags: [verify]
+
+    - name: Display running containers
+      ansible.builtin.debug:
+        msg: "{{ docker_ps.stdout_lines }}"
+      tags: [verify]
+
+    - name: Count running services
+      ansible.builtin.shell: |
+        docker ps --format '{{'{{'}} .Names {{'}}'}}' | grep -E 'receiver|storage|processing|analyzer|kafka|zookeeper|db' | wc -l
+      register: service_count
+      changed_when: false
+      become: no
+      tags: [verify]
+
+    - name: Report deployment status
+      ansible.builtin.debug:
+        msg: "✅ Deployment complete! Running services: {{ service_count.stdout }}/7"
+      tags: [verify]
+
+    - name: Fail if not all services are running
+      ansible.builtin.fail:
+        msg: "❌ Not all services are running! Expected 7, found {{ service_count.stdout }}"
+      when: service_count.stdout|int < 7
+      tags: [verify]

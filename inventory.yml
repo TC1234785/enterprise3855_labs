@@ -1,0 +1,18 @@
+# Ansible Inventory for enterprise3855_labs
+# This file tells Ansible WHERE to deploy (your EC2 instance)
+
+all:
+  hosts:
+    # REPLACE THIS with your EC2 public DNS or IP
+    44.222.107.217:
+  vars:
+    # Connection settings
+    ansible_user: ubuntu
+    # SSH key in WSL home directory (better permissions than Windows mount)
+    ansible_ssh_private_key_file: "~/.ssh/Microservice.pem"
+    ansible_python_interpreter: /usr/bin/python3
+    
+    # Deployment settings
+    git_repo: "https://github.com/TC1234785/enterprise3855_labs.git"
+    git_branch: main
+    app_dir: /home/ubuntu/enterprise3855_labs

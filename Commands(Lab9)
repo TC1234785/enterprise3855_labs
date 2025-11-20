@@ -1,0 +1,19 @@
+Compose Down
+wsl bash -c "ssh -i ~/.ssh/Microservice.pem ubuntu@44.222.107.217 'cd enterprise3855_labs && docker-compose down'"
+
+Restart
+wsl bash -c "ssh -i ~/.ssh/Microservice.pem ubuntu@44.222.107.217 'cd enterprise3855_labs && docker-compose up -d'"
+
+Get into EC2
+wsl bash -c "ssh -i ~/.ssh/Microservice.pem ubuntu@44.222.107.217"
+
+Run with deploy.sh
+wsl bash -c "cd '/mnt/d/Toby Chau/Documents/BCIT/Term 4 (Sept - Dec 2025)/ACIT3855 Git/enterprise3855_labs' && ./deploy.sh"
+
+Run without
+cd '/mnt/d/Toby Chau/Documents/BCIT/Term 4 (Sept - Dec 2025)/ACIT3855 Git/enterprise3855_labs'
+ansible-playbook -i inventory.yml playbook.yml
+
+Adjust IP address (Check own)
+wsl curl ifconfig.me
+Change in securitygroup
