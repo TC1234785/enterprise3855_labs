@@ -209,7 +209,30 @@
       tags: [docker]
 
     # ==========================================================================
-    # PART 6: Verification
+    # PART 6: Database Initialization
+    # ==========================================================================
+    - name: Wait for MySQL to be ready
+      ansible.builtin.pause:
+        seconds: 5
+      tags: [database]
+
+    - name: Create database tables
+      ansible.builtin.command:
+        cmd: docker-compose exec -T storage python create_tables.py
+        chdir: "{{ app_dir }}"
+      become: no
+      register: create_tables
+      failed_when: false
+      tags: [database]
+
+    - name: Display table creation result
+      ansible.builtin.debug:
+        msg: "Database tables initialized"
+      when: create_tables.rc == 0
+      tags: [database]
+
+    # ==========================================================================
+    # PART 7: Verification
     # ==========================================================================
     - name: Wait for services to stabilize
       ansible.builtin.pause:
