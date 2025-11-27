@@ -1,6 +1,7 @@
 services:
   # Core infrastructure
   zookeeper:
+    container_name: zookeeper
     image: confluentinc/cp-zookeeper:7.6.1
     user: "0:0"
     environment:
@@ -9,8 +10,15 @@ services:
     volumes:
       - zookeeper_data:/var/lib/zookeeper/data
       - zookeeper_log:/var/lib/zookeeper/log
+    healthcheck:
+      test: ["CMD-SHELL", "echo srvr | nc localhost 2181 || exit 1"]
+      start_period: 10s
+      interval: 5s
+      timeout: 5s
+      retries: 3
 
   kafka:
+    container_name: kafka
     image: wurstmeister/kafka
     environment:
       KAFKA_BROKER_ID: 1
@@ -25,41 +33,66 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data/kafka:/kafka
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions.sh --bootstrap-server localhost:29092 || exit 1"]
+      start_period: 30s
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    restart: on-failure
 
   db:
+    container_name: db
     image: mysql:latest
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: traindb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
     volumes:
       - ./data/database:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "user", "--password=password"]
+      start_period: 10s
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   # Application services (build from local sources)
   receiver:
+    container_name: receiver
     build:
       context: ./receiver
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     volumes:
       - ./config:/config:ro
       - ./logs:/logs
+    restart: on-failure
 
   storage:
+    container_name: storage
     build:
       context: ./storage
       dockerfile: Dockerfile
     depends_on:
-      - db
-      - kafka
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
     volumes:
       - ./config:/config:ro
       - ./logs:/logs
+    restart: on-failure
 
   processing:
+    container_name: processing
     build:
       context: ./processing
       dockerfile: Dockerfile
@@ -73,18 +106,22 @@ services:
       - ./data/processing:/data/processing
 
   analyzer:
+    container_name: analyzer
     build:
       context: ./analyzer
       dockerfile: Dockerfile
     ports:
       - "8110:8110"
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     volumes:
       - ./config:/config:ro
       - ./logs:/logs
+    restart: on-failure
 
   dashboard:
+    container_name: dashboard
     build:
       context: ./dashboard
       dockerfile: Dockerfile

@@ -1,10 +1,10 @@
 /* UPDATE THESE VALUES TO MATCH YOUR SETUP */
 
-const PROCESSING_STATS_API_URL = "http://44.222.107.217:8100/stats"
+const PROCESSING_STATS_API_URL = "http://localhost:8100/stats"
 const ANALYZER_API_URL = {
-    stats: "http://44.222.107.217:8110/stats",
-    passenger_count: "http://44.222.107.217:8110/na_train/passenger_count",
-    incoming_train: "http://44.222.107.217:8110/na_train/incoming_train"
+    stats: "http://localhost:8110/stats",
+    passenger_count: "http://localhost:8110/na_train/passenger_count",
+    incoming_train: "http://localhost:8110/na_train/incoming_train"
 }
 
 // This function fetches and updates the general statistics

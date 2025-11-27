@@ -8,8 +8,10 @@ import logging.config
 import json
 import datetime
 import time
+import random
 from pykafka import KafkaClient
 from pykafka.common import OffsetType
+from pykafka.exceptions import KafkaException
 import threading
 from datetime import datetime as dt
 from datetime import date, timezone
@@ -35,10 +37,16 @@ logging.config.dictConfig(log_config)
 # Create logger
 logger = logging.getLogger('basicLogger')
 
-# Create MySQL database engine using configuration
+# Create MySQL database engine using configuration with connection pooling
 db_config = app_config['datastore']
 db_url = f"mysql+pymysql://{db_config['user']}:{db_config['password']}@{db_config['hostname']}:{db_config['port']}/{db_config['db']}"
-ENGINE = create_engine(db_url)  
+ENGINE = create_engine(
+    db_url,
+    pool_size=10,              # Maximum number of connections to keep in pool
+    max_overflow=20,           # Maximum overflow connections beyond pool_size
+    pool_recycle=3600,         # Recycle connections after 1 hour (3600s) to prevent stale connections
+    pool_pre_ping=True         # Test connections before using them to catch stale/closed connections
+)
 SessionLocal = sessionmaker(bind=ENGINE)  
 
 def make_session():
@@ -141,44 +149,105 @@ def get_wait_time_reading(session,start_timestamp, end_timestamp):
 app = connexion.FlaskApp(__name__, specification_dir='')  
 app.add_api("student-770-NorthAmericanTrainInfo-1.0.0-swagger.yaml", strict_validation=True, validate_responses=True)  # Add OpenAPI spec
 
+
+class KafkaConsumerWrapper:
+    """Kafka consumer wrapper with retry logic for storage service"""
+    def __init__(self, hostname, topic):
+        self.hostname = hostname
+        self.topic = topic
+        self.client = None
+        self.consumer = None
+        self.connect()
+    
+    def connect(self):
+        """Infinite loop: will keep trying until connected"""
+        while True:
+            logger.debug("Trying to connect to Kafka...")
+            if self.make_client():
+                if self.make_consumer():
+                    break
+            # Sleep for random amount of time (0.5 to 1.5s)
+            time.sleep(random.randint(500, 1500) / 1000)
+    
+    def make_client(self):
+        """Creates Kafka client. Returns True on success, False on failure"""
+        if self.client is not None:
+            return True
+        try:
+            self.client = KafkaClient(hosts=self.hostname)
+            logger.info("Kafka client created!")
+            return True
+        except KafkaException as e:
+            logger.warning(f"Kafka error when making client: {e}")
+            self.client = None
+            self.consumer = None
+            return False
+    
+    def make_consumer(self):
+        """Creates Kafka consumer. Returns True on success, False on failure"""
+        if self.consumer is not None:
+            return True
+        if self.client is None:
+            return False
+        try:
+            topic = self.client.topics[str.encode(self.topic)]
+            self.consumer = topic.get_simple_consumer(
+                consumer_group=b'event_group',
+                reset_offset_on_start=False,
+                auto_offset_reset=OffsetType.LATEST
+            )
+            logger.info(f"Kafka consumer created for topic {self.topic}")
+            return True
+        except KafkaException as e:
+            logger.warning(f"Kafka error when making consumer: {e}")
+            self.client = None
+            self.consumer = None
+            return False
+    
+    def messages(self):
+        """Generator method that catches exceptions in the consumer loop"""
+        if self.consumer is None:
+            self.connect()
+        while True:
+            try:
+                for msg in self.consumer:
+                    yield msg
+            except KafkaException as e:
+                logger.warning(f"Kafka issue in consumer: {e}")
+                self.client = None
+                self.consumer = None
+                self.connect()
+
+
 def process_messages():
     """Process event messages from Kafka and store them in the DB."""
     hostname = f"{app_config['events']['hostname']}:{app_config['events']['port']}"
     logger.info("Kafka consumer loop starting; target broker=%s topic=%s",
                 hostname, app_config['events']['topic'])
-    while True:
+    
+    # Create global Kafka consumer wrapper (handles reconnection automatically)
+    kafka_wrapper = KafkaConsumerWrapper(hostname, app_config['events']['topic'])
+    
+    for msg in kafka_wrapper.messages():
+        if msg is None:
+            continue
         try:
-            client = KafkaClient(hosts=hostname)
-            topic = client.topics[str.encode(app_config['events']['topic'])]
+            msg_str = msg.value.decode('utf-8')
+            msg_obj = json.loads(msg_str)
+            logger.info("Message: %s", msg_obj)
+            payload = msg_obj.get('payload')
+            mtype = msg_obj.get('type')
 
-            consumer = topic.get_simple_consumer(
-                consumer_group=b'event_group',
-                reset_offset_on_start=False,
-                auto_offset_reset=OffsetType.LATEST
-            )
-            logger.info("Started Kafka consumer for topic %s on %s", app_config['events']['topic'], hostname)
+            # Dispatch based on message type
+            if mtype == 'passenger_count' or mtype == 'event1':
+                report_count_reading(payload)
+            elif mtype == 'wait_time' or mtype == 'event2':
+                report_wait_time_reading(payload)
 
-            for msg in consumer:
-                if msg is None:
-                    continue
-                msg_str = msg.value.decode('utf-8')
-                msg_obj = json.loads(msg_str)
-                logger.info("Message: %s", msg_obj)
-                payload = msg_obj.get('payload')
-                mtype = msg_obj.get('type')
-
-                # Dispatch based on message type
-                if mtype == 'passenger_count' or mtype == 'event1':
-                    report_count_reading(payload)
-                elif mtype == 'wait_time' or mtype == 'event2':
-                    report_wait_time_reading(payload)
-
-                # commit that we've processed this message
-                consumer.commit_offsets()
-
+            # commit that we've processed this message
+            kafka_wrapper.consumer.commit_offsets()
         except Exception as e:
-            logger.error("Kafka consumer error (%s). Retrying in 5s...", e)
-            time.sleep(5)
+            logger.error(f"Error processing message: {e}")
 
 
 def setup_kafka_thread():

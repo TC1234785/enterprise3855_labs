@@ -1,0 +1,52 @@
+Receiver:
+Strategy: Limited retries (3 attempts)
+
+Why? Receiver handles HTTP requests from external clients (jMeter, dashboard)
+Problem if infinite: HTTP request would hang forever waiting for Kafka
+Solution: Try 3 times, then give up and return error to client
+Result: Client gets fast feedback (not stuck waiting), error is logged for monitoring
+
+Storage:
+Strategy: Infinite retries
+
+Why? Storage runs in background thread, not handling HTTP requests
+Problem if limited: Would lose messages or stop processing permanently
+Solution: Keep trying forever until Kafka comes back
+Result: Service survives Kafka restarts without manual intervention
+
+Analyzer:
+Strategy: Retry on next request
+
+Why? Analyzer handles HTTP requests, but can afford to fail occasionally
+Problem if hanging: Dashboard would freeze waiting for stats
+Solution: If error occurs, reset consumer and return 500 error immediately
+Result: Next request will reconnect automatically via get_consumer()
+
+Part 4
+What Each Parameter Does:
+1. pool_size=10
+What: Maximum number of persistent database connections in the pool
+Why: Limits memory usage while providing enough connections for concurrent operations
+Default: 5 (too small for continuous processing)
+Our value: 10 connections is sufficient for Storage service workload
+2. max_overflow=20
+What: Additional temporary connections allowed beyond pool_size during high load
+Why: Handles traffic spikes without rejecting requests
+Default: 10
+Our value: 20 overflow connections (30 total max) handles bursts from Kafka
+3. pool_recycle=3600 (CRITICAL FIX)
+What: Recycles (closes and reopens) connections after 3600 seconds (1 hour)
+Why: MySQL closes idle connections after 8 hours by default (wait_timeout), but network issues can close them sooner
+Problem without it: Stale connections sit in pool, queries fail with "MySQL server has gone away"
+Our value: 1 hour is conservative (well before MySQL's 8-hour timeout)
+4. pool_pre_ping=True (CRITICAL FIX)
+What: Tests connection with lightweight query (SELECT 1) before using it
+Why: Detects stale/closed connections and creates new ones automatically
+Problem without it: Application tries to use dead connection, query fails
+Overhead: Minimal (~1ms per query), far better than connection failures
+Our value: True ensures every query uses a valid connection
+
+Commands for large numbers:
+docker exec -it storage python drop_tables.py
+docker exec -it storage python create_tables.py
+Remove-Item ".\data\processing\processing.json"
