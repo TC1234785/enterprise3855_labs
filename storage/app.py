@@ -246,6 +246,7 @@ def process_messages():
 
             # commit that we've processed this message
             kafka_wrapper.consumer.commit_offsets()
+            logger.info(f"Connected to Kafka")
         except Exception as e:
             logger.error(f"Error processing message: {e}")
 

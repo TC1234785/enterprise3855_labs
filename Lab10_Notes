@@ -1,3 +1,40 @@
+Zookeeper (healthy)
+    ↓
+Kafka (healthy)
+    ↓ ↓ ↓
+    ├─→ Receiver
+    ├─→ Storage ← MySQL (healthy)
+    └─→ Analyzer
+        ↓
+    Processing
+        ↓
+    Dashboard
+
+Healthcheck Summary
+Zookeeper
+Command: echo srvr | nc localhost 2181
+Grace period: 10 seconds before checks start
+Check interval: Every 5 seconds
+Timeout: 5 seconds per check
+Retries: 3 consecutive failures = unhealthy
+Purpose: Verifies Zookeeper is accepting client connections
+Kafka
+Command: kafka-broker-api-versions.sh --bootstrap-server localhost:29092
+Grace period: 30 seconds before checks start
+Check interval: Every 10 seconds
+Timeout: 10 seconds per check
+Retries: 3 consecutive failures = unhealthy
+Purpose: Confirms Kafka broker is responding to API requests
+MySQL (db)
+Command: mysqladmin ping -h localhost -u user --password=password
+Grace period: 10 seconds before checks start
+Check interval: Every 5 seconds
+Timeout: 5 seconds per check
+Retries: 10 consecutive failures = unhealthy (higher for slower initialization)
+Purpose: Checks database accepts authenticated connections
+
+
+
 Receiver:
 Strategy: Limited retries (3 attempts)
 
