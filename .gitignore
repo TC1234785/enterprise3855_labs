@@ -49,3 +49,4 @@ herman/
 *.code-workspace
 
 
+data/health/health_stats.json

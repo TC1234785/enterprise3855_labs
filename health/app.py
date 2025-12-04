@@ -9,6 +9,7 @@ import json
 import datetime
 import threading
 import time
+import os
 from apscheduler.schedulers.background import BackgroundScheduler
 
 # Load configuration
@@ -30,10 +31,7 @@ DATASTORE_FILE = app_config['datastore']['filename']
 
 def init_datastore():
     """Initialize the datastore with default values"""
-    try:
-        with open(DATASTORE_FILE, 'r') as f:
-            json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
+    if not os.path.exists(DATASTORE_FILE):
         logger.info("Initializing datastore")
         data = {
             "receiver": "Unknown",
@@ -48,16 +46,12 @@ def init_datastore():
 
 def check_service_health(service_name, url):
     """Check health of a single service"""
-    try:
-        response = requests.get(url, timeout=5)
-        if response.status_code == 200:
-            logger.info(f"Service {service_name} is Running")
-            return "Running"
-        else:
-            logger.info(f"Service {service_name} is Down (status {response.status_code})")
-            return "Down"
-    except requests.exceptions.RequestException as e:
-        logger.info(f"Service {service_name} is Down ({str(e)})")
+    response = requests.get(url, timeout=5)
+    if response.status_code == 200:
+        logger.info(f"Service {service_name} is Running")
+        return "Running"
+    else:
+        logger.info(f"Service {service_name} is Down (status {response.status_code})")
         return "Down"
 
 
@@ -86,11 +80,11 @@ def get_health_stats():
     """Get health statistics from datastore"""
     logger.info("Health statistics request received")
     
-    try:
+    if os.path.exists(DATASTORE_FILE):
         with open(DATASTORE_FILE, 'r') as f:
             data = json.load(f)
         return data, 200
-    except FileNotFoundError:
+    else:
         logger.error("Datastore file not found")
         return {"message": "Statistics not available"}, 404
 
