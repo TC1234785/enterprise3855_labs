@@ -1,0 +1,15 @@
+services:
+  receiver:
+    url: http://receiver:8080/health
+  storage:
+    url: http://storage:8090/health
+  processing:
+    url: http://processing:8100/health
+  analyzer:
+    url: http://analyzer:8110/health
+
+scheduler:
+  period: 20
+
+datastore:
+  filename: /data/health/health_stats.json

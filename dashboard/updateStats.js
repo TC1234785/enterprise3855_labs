@@ -6,16 +6,23 @@ const ANALYZER_API_URL = {
     passenger_count: "http://localhost:8110/na_train/passenger_count",
     incoming_train: "http://localhost:8110/na_train/incoming_train"
 }
+const HEALTH_API_URL = "http://localhost:8120/health"
 
 // This function fetches and updates the general statistics
 const makeReq = (url, cb) => {
     fetch(url)
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            return res.json();
+        })
         .then((result) => {
             console.log("Received data: ", result)
             cb(result);
         }).catch((error) => {
-            updateErrorMessages(error.message)
+            console.error(`Error fetching ${url}:`, error);
+            updateErrorMessages(`${url}: ${error.message}`)
         })
 }
 
@@ -39,6 +46,11 @@ let max_train = 0
 
 const getStats = () => {
     document.getElementById("last-updated-value").innerText = getLocaleDateStr()
+    
+    makeReq(HEALTH_API_URL, (result) => {
+        const healthDisplay = `Receiver: ${result.receiver}\nStorage: ${result.storage}\nProcessing: ${result.processing}\nAnalyzer: ${result.analyzer}\nLast Updated: ${result.last_update}`
+        document.getElementById("health-stats").innerText = healthDisplay
+    })
     
     makeReq(PROCESSING_STATS_API_URL, (result) => updateCodeDiv(result, "processing-stats"))
     makeReq(ANALYZER_API_URL.stats, (result) => {

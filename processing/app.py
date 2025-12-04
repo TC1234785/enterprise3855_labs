@@ -133,6 +133,10 @@ def init_scheduler():
         
     sched.start()
 
+def health():
+    """Health check endpoint"""
+    return {"status": "ok"}, 200
+
 app = connexion.FlaskApp(__name__, specification_dir='') 
 app.add_middleware(
     CORSMiddleware,

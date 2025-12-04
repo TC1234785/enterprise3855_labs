@@ -1,0 +1,25 @@
+Health Endpoints (return {"status": "ok"} with 200):
+
+http://localhost:8080/health - Receiver service health
+http://localhost:8100/health - Processing service health
+http://localhost:8110/health - Analyzer service health
+http://localhost:8120/health - Health Check service (returns all service statuses)
+
+Statistics Endpoints:
+
+http://localhost:8100/stats - Processing service statistics
+http://localhost:8110/stats - Analyzer service statistics
+
+Event Endpoints (Analyzer):
+http://localhost:8110/na_train/passenger_count?index={number} - Get specific passenger count event
+http://localhost:8110/na_train/incoming_train?index={number} - Get specific incoming train event
+
+Dashboard:
+http://localhost:3000 - Main dashboard displaying health status, statistics, and events
+
+Swagger UI (API Documentation):
+
+http://localhost:8080/ui - Receiver API docs
+http://localhost:8100/ui - Processing API docs
+http://localhost:8110/ui - Analyzer API docs
+http://localhost:8120/ui - Health Check API docs

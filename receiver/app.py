@@ -171,6 +171,10 @@ def report_wait_time_reading(body):
     # Always return 201 as per async design
     return NoContent, 201
 
+def health():
+    """Health check endpoint"""
+    return {"status": "ok"}, 200
+
 app = connexion.FlaskApp(__name__, specification_dir='') 
 app.add_api("student-770-NorthAmericanTrainInfo-1.0.0-swagger.yaml", strict_validation=True, validate_responses=True) 
 if __name__ == "__main__":

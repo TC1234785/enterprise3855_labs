@@ -155,6 +155,11 @@ def get_stats():
         return {"message": "Error computing stats"}, 500
 
 
+def health():
+    """Health check endpoint"""
+    return {"status": "ok"}, 200
+
+
 app = connexion.FlaskApp(__name__, specification_dir='')
 app.add_middleware(
     CORSMiddleware,

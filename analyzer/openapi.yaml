@@ -4,6 +4,14 @@ info:
   version: "1.0.0"
   description: Inspect Kafka events for passenger_count and wait_time
 paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      operationId: app.health
+      description: Returns the health status of the service
+      responses:
+        '200':
+          description: Service is running
   /na_train/passenger_count:
     get:
       summary: Get passenger_count event by index

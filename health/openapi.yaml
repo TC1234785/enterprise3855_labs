@@ -1,0 +1,51 @@
+openapi: 3.0.0
+info:
+  description: Health Check Service API
+  version: "1.0.0"
+  title: Health Check API
+  contact:
+    email: tchau29@my.bcit.ca
+
+paths:
+  /health:
+    get:
+      summary: Get health status of all services
+      operationId: app.get_health_stats
+      description: Returns the current health status of all backend services
+      responses:
+        '200':
+          description: Successfully returned health statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStats'
+        '404':
+          description: Statistics not available
+
+components:
+  schemas:
+    HealthStats:
+      type: object
+      required:
+        - receiver
+        - storage
+        - processing
+        - analyzer
+        - last_update
+      properties:
+        receiver:
+          type: string
+          example: "Running"
+        storage:
+          type: string
+          example: "Down"
+        processing:
+          type: string
+          example: "Running"
+        analyzer:
+          type: string
+          example: "Running"
+        last_update:
+          type: string
+          format: date-time
+          example: "2022-03-22T11:12:23"

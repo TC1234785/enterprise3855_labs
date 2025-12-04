@@ -120,6 +120,24 @@ services:
       - ./logs:/logs
     restart: on-failure
 
+  health:
+    container_name: health
+    build:
+      context: ./health
+      dockerfile: Dockerfile
+    ports:
+      - "8120:8120"
+    depends_on:
+      - receiver
+      - storage
+      - processing
+      - analyzer
+    volumes:
+      - ./config:/config:ro
+      - ./logs:/logs
+      - ./data/health:/data/health
+    restart: on-failure
+
   dashboard:
     container_name: dashboard
     build:

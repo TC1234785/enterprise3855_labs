@@ -146,6 +146,10 @@ def get_wait_time_reading(session,start_timestamp, end_timestamp):
     logger.debug("Found %d WaitTimeEvent readings (start: %s, end: %s)", len(results), start, end)
     return results
 
+def health():
+    """Health check endpoint"""
+    return {"status": "ok"}, 200
+
 app = connexion.FlaskApp(__name__, specification_dir='')  
 app.add_api("student-770-NorthAmericanTrainInfo-1.0.0-swagger.yaml", strict_validation=True, validate_responses=True)  # Add OpenAPI spec
 

@@ -6,6 +6,14 @@ info:
   contact:
     email: tchau29@my.bcit.ca
 paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      operationId: app.health
+      description: Returns the health status of the service
+      responses:
+        '200':
+          description: Service is running
   /na_train/passenger_count:
     post:
       summary: Reports a batch of passenger_count sensor readings
