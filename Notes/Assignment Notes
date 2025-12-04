@@ -23,3 +23,24 @@ http://localhost:8080/ui - Receiver API docs
 http://localhost:8100/ui - Processing API docs
 http://localhost:8110/ui - Analyzer API docs
 http://localhost:8120/ui - Health Check API docs
+
+
+
+
+New Endpoints (Lab 12):
+# Health endpoints
+curl http://localhost/receiver/health
+curl http://localhost/storage/health
+curl http://localhost/processing/health
+curl http://localhost/analyzer/health
+curl http://localhost/health/health
+
+# Stats endpoints
+curl http://localhost/processing/stats
+curl http://localhost/analyzer/stats
+
+Swagger UI:
+http://localhost/receiver/ui
+http://localhost/processing/ui
+http://localhost/analyzer/ui
+http://localhost/health/ui

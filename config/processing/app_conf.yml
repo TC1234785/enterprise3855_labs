@@ -4,9 +4,9 @@ scheduler:
 
 events:
   passenger_count:
-    url: http://storage:8090/na_train/passenger_count
+    url: http://storage:8090/storage/na_train/passenger_count
   wait_time:
-    url: http://storage:8090/na_train/incoming_train
+    url: http://storage:8090/storage/na_train/incoming_train
 
 data_store:
   filename: /data/processing/processing.json

@@ -1,12 +1,12 @@
 /* UPDATE THESE VALUES TO MATCH YOUR SETUP */
 
-const PROCESSING_STATS_API_URL = "http://localhost:8100/stats"
+const PROCESSING_STATS_API_URL = "/processing/stats"
 const ANALYZER_API_URL = {
-    stats: "http://localhost:8110/stats",
-    passenger_count: "http://localhost:8110/na_train/passenger_count",
-    incoming_train: "http://localhost:8110/na_train/incoming_train"
+    stats: "/analyzer/stats",
+    passenger_count: "/analyzer/na_train/passenger_count",
+    incoming_train: "/analyzer/na_train/incoming_train"
 }
-const HEALTH_API_URL = "http://localhost:8120/health"
+const HEALTH_API_URL = "/health/health"
 
 // This function fetches and updates the general statistics
 const makeReq = (url, cb) => {
